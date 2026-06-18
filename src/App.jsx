@@ -8,14 +8,14 @@ import { cn } from "#/lib/utils";
 // oxlint-disable-next-line no-unassigned-import
 import "#/style.css";
 
-const data = ["Todo 1", "Todo 2"];
+const data = [{ done: false, content: "Test" }];
 
 /**
  * @param {object}
  * @param {boolean} [.value]
  * @param {string} [.className]
  * @param {React.RefObject<HTMLInputElement>} [.ref]
- * @param {HTMLInput}
+ * @param {React.ComponentProps<"input">["onChange"]} [.onChange]
  */
 function Checkbox({ value, className, ref, onChange }) {
 	return (
@@ -35,13 +35,15 @@ function Checkbox({ value, className, ref, onChange }) {
 /**
  * @param {object}
  * @param {React.RefObject<HTMLButtonElement>} [.ref]
+ * @param {React.ComponentProps<"button">["onClick"]} [.onClick]
  */
-function Delete({ ref }) {
+function Delete({ ref, onClick }) {
 	return (
 		<button
 			ref={ref}
 			type="button"
 			className="text-pink-200 hover:text-pink-500 cursor-pointer transition-colors"
+			onClick={onClick}
 		>
 			<Trash className="size-6" />
 		</button>
@@ -52,39 +54,71 @@ function Delete({ ref }) {
  * @typedef TodoCardProps
  * @prop {boolean} [done]
  * @prop {string} [content]
+ * @prop {React.RefObject<HTMLInputElement>} [done-ref]
+ * @prop {React.RefObject<HTMLTextAreaElement>} [content-ref]
+ * @prop {React.RefObject<HTMLButtonElement>} [delete-ref]
+ * @prop {React.ComponentProps<"input">["onChange"]} [onDone]
+ * @prop {React.ComponentProps<"textarea">["onChange"]} [onEdit]
+ * @prop {React.ComponentProps<"button">["onClick"]} [onDelete]
  */
 
 /**
  * @param {TodoCardProps}
  */
-function TodoCard({ done = false, content = "" }) {
-	const [checked, setChecked] = React.useState(done);
-	const checkboxRef = React.useRef();
-	const deleteRef = React.useRef();
-
+function TodoCard({
+	done = false,
+	content = "",
+	"done-ref": doneRef,
+	"content-ref": contentRef,
+	"delete-ref": deleteRef,
+	onDone,
+	onEdit,
+	onDelete,
+}) {
 	return (
 		<div className="p-6 flex justify-between items-start gap-6 text-lg border-2 border-pink-300 rounded-xl bg-white">
 			<div className="flex flex-1 gap-6">
 				<Checkbox
 					value={done}
-					ref={checkboxRef}
-					onChange={(e) => setChecked(e.target.checked)}
+					ref={doneRef}
+					onChange={onDone}
 				/>
 				<textarea
 					type="text"
 					className={cn(
 						"-my-0.5 flex-1 w-full resize-none field-sizing-content box-border focus:outline-none focus:ring-0 decoration-2",
-						{ "line-through": checked },
+						{ "line-through": done },
 					)}
-					defaultValue={content}
+					ref={contentRef}
+					value={content}
+					onChange={onEdit}
 				/>
 			</div>
-			<Delete ref={deleteRef} />
+			<Delete
+				ref={deleteRef}
+				onClick={onDelete}
+			/>
 		</div>
 	);
 }
 
 export default function Layout() {
+	const [todos, setTodos] = React.useState(data);
+
+	function addTodo() {
+		setTodos((prev) => [...prev, { done: false, content: "" }]);
+	}
+
+	function updateTodo(index, patch) {
+		setTodos((prev) =>
+			prev.map((t, i) => (i === index ? { ...t, ...patch } : t)),
+		);
+	}
+
+	function deleteTodo(index) {
+		setTodos((prev) => prev.filter((_, i) => i !== index));
+	}
+
 	return (
 		<main className="min-h-screen flex flex-col justify-center items-center bg-pink-50">
 			<div className="max-w-2xl w-full mx-auto py-8 flex flex-col gap-4">
@@ -92,14 +126,19 @@ export default function Layout() {
 					<button
 						type="button"
 						className="grid place-items-center p-4 text-white rounded-full  bg-pink-500 hover:bg-pink-800 transition-colors cursor-pointer"
+						onClick={addTodo}
 					>
 						<Plus className="size-6" />
 					</button>
 				</div>
-				{data.map((content) => (
+				{todos.map(({ done, content }, i) => (
 					<TodoCard
-						key={content}
+						key={i}
+						done={done}
 						content={content}
+						onDone={(e) => updateTodo(i, { done: e.target.checked })}
+						onEdit={(e) => updateTodo(i, { content: e.target.value })}
+						onDelete={() => deleteTodo(i)}
 					/>
 				))}
 			</div>
