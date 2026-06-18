@@ -104,8 +104,18 @@ function TodoCard({
 
 export default function Layout() {
 	const [todos, setTodos] = React.useState(data);
+	const newTodoRef = React.useRef(null);
+	const isAdding = React.useRef(false);
+
+	React.useEffect(() => {
+		if (isAdding.current && newTodoRef.current) {
+			newTodoRef.current.focus();
+			isAdding.current = false;
+		}
+	}, [todos.length]);
 
 	function addTodo() {
+		isAdding.current = true;
 		setTodos((prev) => [...prev, { done: false, content: "" }]);
 	}
 
@@ -136,6 +146,7 @@ export default function Layout() {
 						key={i}
 						done={done}
 						content={content}
+						content-ref={i === todos.length - 1 ? newTodoRef : undefined}
 						onDone={(e) => updateTodo(i, { done: e.target.checked })}
 						onEdit={(e) => updateTodo(i, { content: e.target.value })}
 						onDelete={() => deleteTodo(i)}
