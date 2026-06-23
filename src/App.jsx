@@ -1,10 +1,11 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Check from "~icons/lucide/check";
 import Plus from "~icons/lucide/plus";
 import Trash from "~icons/lucide/trash";
 
-import { useTodoData } from "#/hooks/data";
 import { cn } from "#/lib/utils";
+import { addTask, editTask, removeTask } from "#/store/reducers/todo";
 
 // oxlint-disable-next-line no-unassigned-import
 import "#/style.css";
@@ -102,7 +103,8 @@ function TodoCard({
 }
 
 export default function Layout() {
-	const [todos, , appendTodo, editTodo, deleteTodo] = useTodoData();
+	const todos = useSelector((state) => state.todo.todos);
+	const dispatch = useDispatch();
 	const newTodoRef = React.useRef(null);
 	const isAdding = React.useRef(false);
 
@@ -115,11 +117,11 @@ export default function Layout() {
 
 	function addTodo() {
 		isAdding.current = true;
-		appendTodo({ done: false, content: "" });
+		dispatch(addTask({ done: false, content: "" }));
 	}
 
 	function updateTodo(index, patch) {
-		editTodo(index, (t) => ({ ...t, ...patch }));
+		dispatch(editTask({ index, patch }));
 	}
 
 	return (
@@ -142,7 +144,7 @@ export default function Layout() {
 						content-ref={i === todos.length - 1 ? newTodoRef : undefined}
 						onDone={(e) => updateTodo(i, { done: e.target.checked })}
 						onEdit={(e) => updateTodo(i, { content: e.target.value })}
-						onDelete={() => deleteTodo(i)}
+						onDelete={() => dispatch(removeTask(i))}
 					/>
 				))}
 			</div>
