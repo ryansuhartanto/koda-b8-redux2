@@ -17,6 +17,11 @@ const todoSlice = createSlice({
 			state.todos.push(action.payload);
 			return state;
 		},
+		editTask(state, action) {
+			const { index, patch } = action.payload;
+			state.todos[index] = { ...state.todos[index], ...patch };
+			return state;
+		},
 		removeTask(state, action) {
 			state.todos.splice(action.payload, 1);
 			return state;
@@ -25,4 +30,4 @@ const todoSlice = createSlice({
 });
 
 export default todoSlice;
-export const { addTask, removeTask } = todoSlice.actions;
+export const { addTask, editTask, removeTask } = todoSlice.actions;
