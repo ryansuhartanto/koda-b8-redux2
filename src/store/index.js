@@ -6,7 +6,7 @@ import reducer from "./reducers";
 
 const persistedReducer = persistReducer(
 	{
-		key: "todo",
+		key: "data",
 		storage,
 	},
 	reducer,
