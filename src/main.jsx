@@ -17,10 +17,10 @@ const router = createBrowserRouter([
 const root = createRoot(document.querySelector("body"));
 root.render(
 	<React.StrictMode>
-		<PersistGate persistor={persistor}>
-			<Provider store={store}>
+		<Provider store={store}>
+			<PersistGate persistor={persistor}>
 				<RouterProvider router={router} />
-			</Provider>
-		</PersistGate>
+			</PersistGate>
+		</Provider>
 	</React.StrictMode>,
 );
